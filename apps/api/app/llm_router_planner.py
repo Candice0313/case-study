@@ -664,7 +664,7 @@ def llm_planner(
     """
     Planner: single next_action + action_args + info_type (no tools list).
     Returns: next_action, action_args, info_type, intent, symptom, missing_info, clarify_question.
-    Rule-first: deterministic_planner_override runs before LLM to avoid planner抖动.
+    Rule-first: deterministic_planner_override runs before LLM to avoid planner jitter.
     """
     has_model = bool((model_number or "").strip())
     has_part = bool((part_number or "").strip())

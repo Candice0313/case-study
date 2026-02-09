@@ -27,7 +27,7 @@ const NAV_LINKS = [
 export function Header() {
   return (
     <header className="sticky top-0 z-10 bg-[var(--ps-white)]">
-      {/* 顶条：Logo | 电话+营业时间 | Order Status / Your Account / Cart（黑色 icon） */}
+      {/* Top bar: Logo | Phone + hours | Order Status / Your Account / Cart (black icons) */}
       <div className="header-top-bar border-b border-[var(--ps-border)] px-4 py-2.5">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <a
@@ -90,7 +90,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* 主导航：Teal 背景 + 导航链接 + 搜索框 */}
+      {/* Main nav: Teal background + nav links + search box */}
       <div
         className="flex flex-wrap items-center gap-2 px-4 py-2.5"
         style={{ backgroundColor: "var(--ps-teal)" }}
@@ -133,7 +133,7 @@ export function Header() {
         </form>
       </div>
 
-      {/* 价值主张条：Price Match / Fast Shipping / OEM / 1 Year Warranty */}
+      {/* Value props bar: Price Match / Fast Shipping / OEM / 1 Year Warranty */}
       <div
         className="flex flex-wrap items-center justify-center gap-4 px-4 py-3 text-sm font-semibold text-[var(--ps-text)]"
         style={{ backgroundColor: "var(--ps-off-white)" }}

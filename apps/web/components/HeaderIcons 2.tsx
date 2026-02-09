@@ -1,6 +1,6 @@
 "use client";
 
-/** 顶部图标：内联 SVG，与 PartSelect 官网风格一致。如需替换为官方资源，见 README 或 docs/header-assets.md */
+/** Header icons: inline SVGs matching PartSelect site style. To swap for official assets, see README or docs/header-assets.md */
 
 export function IconOrderStatus() {
   return (

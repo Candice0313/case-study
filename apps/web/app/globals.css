@@ -2,21 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PartSelect 官网 CSS 色值与基础样式（与 partselect.com 一致） */
+/* PartSelect site CSS colors and base styles (aligned with partselect.com) */
 :root {
   --ps-white: #fff;
   --ps-off-white: #f2f2f2;
   --ps-border: #ddd;
   --ps-text: #121212;
   --ps-text-muted: #444;
-  /* 主色：官网 teal #337778 */
+  /* Primary: site teal #337778 */
   --ps-teal: #337778;
   --ps-teal-hover: #2c6666;
   --ps-teal-light: #e6f5f5;
-  /* 官网黄色：Find Your Part / searchbox / btn--orange #f3c04c */
+  /* Site yellow: Find Your Part / searchbox / btn--orange #f3c04c */
   --ps-yellow: #f3c04c;
   --ps-yellow-hover: rgba(243, 192, 76, 0.85);
-  /* 官网无圆角 */
+  /* Site: no border radius */
   --ps-radius: 0;
   --ps-chat-user: #337778;
   --ps-chat-bot: #f7f7f7;
@@ -79,7 +79,7 @@ textarea:focus {
   border-color: var(--ps-teal);
 }
 
-/* 官网 .btn--teal */
+/* Site .btn--teal */
 .btn-teal {
   align-items: center;
   border: 0;
@@ -101,7 +101,7 @@ textarea:focus {
   text-decoration: none;
 }
 
-/* 官网 .btn--orange */
+/* Site .btn--orange */
 .btn-yellow {
   background: var(--ps-yellow);
   color: var(--ps-text);
@@ -112,7 +112,7 @@ textarea:focus {
   text-decoration: none;
 }
 
-/* 顶条：Order Status / Your Account / Cart 为黑色图标和文字（与官网一致） */
+/* Top bar: Order Status / Your Account / Cart use black icons and text (matches site) */
 .header-top-bar a {
   color: #121212 !important;
 }
