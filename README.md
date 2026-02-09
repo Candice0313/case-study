@@ -1,70 +1,187 @@
-# Getting Started with Create React App
+# PartSelect Domain-Focused Chat Agent
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A conversational agent for **refrigerator and dishwasher** parts support: find parts by model, check compatibility, get installation and troubleshooting guidance. The system is domain-locked, evidence-grounded, and built as a case study in structured agent design.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Project overview
 
-### `npm start`
+The repo implements a **single-domain chat assistant** aligned to a PartSelect-style product: users ask in natural language about appliance parts, model numbers, compatibility, and repair; the backend classifies scope, routes to the right capability (RAG troubleshooting, parts list, part lookup, compatibility, or clarification), and returns an answer plus optional **Sources** (citations) and **Suggested parts** (product cards). The stack is **FastAPI (Python)** for the agent and **Next.js (App Router)** for the chat UI; optional **PostgreSQL + pgvector** for RAG over repair guides and part catalog.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Main components:**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+| Layer        | Role |
+|-------------|------|
+| **Scope router** | Classifies each message as in-scope (appliance parts/support) or out-of-scope; ambiguous or off-topic requests get a polite redirect. |
+| **Agent (LangGraph)** | State machine: triage or LLM planner → clarify / parts_list / part_lookup / compatibility / find_model_help / retrieve (RAG). Produces `answer`, `citations`, `product_cards`. |
+| **Tools**   | `get_troubleshooting` (RAG), `part_lookup`, `search_parts`, `check_compatibility`, Serp for model/part pages. |
+| **Web app** | Chat UI with markdown answers, Sources list, and product cards linking to PartSelect. |
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Product goal & non-goals
 
-### `npm run build`
+**Goals**
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Help users **find parts** for a given model (parts list, model overview, symptom-based suggestions).
+- **Check compatibility** between a part (e.g. PS number) and a model.
+- Provide **troubleshooting** guidance (not cooling, not draining, leaking, ice maker, etc.) grounded in ingested repair guides, with citations.
+- Support **“Where is my model number?”** with short guidance and links to refrigerator/dishwasher locator pages.
+- Stay **in-domain**: refrigerators and dishwashers only; refuse or redirect off-topic and out-of-scope requests.
+- Prefer **evidence and structured data** (RAG, DB, Serp) over free-form LLM generation where possible.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Non-goals**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- No support for other appliances (washer, dryer, oven, microwave, etc.).
+- No order placement, cart, or checkout (informational only).
+- No medical, legal, coding, or general-knowledge Q&A.
+- No open-ended chitchat beyond a short welcome and redirect to parts/support.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## User experience flow
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **User sends a message** in the chat (e.g. “My fridge is not cooling”, “parts for WRF535SWHZ”, “is PS123 compatible with model X?”).
+2. **Scope** is classified: in-scope → agent; out-of-scope/ambiguous → fixed redirect message, no graph run.
+3. **Agent** runs:
+   - **Triage or LLM planner** sets `next_action` (clarify, parts_list, part_lookup, compatibility, find_model_help, retrieve).
+   - **Clarify**: reply with a short question (e.g. “What’s your model number?”) and no links/cards.
+   - **Parts list / part lookup / compatibility / find_model_help**: dedicated nodes return an answer plus citations and/or product_cards.
+   - **Retrieve**: RAG over repair guides → evidence → compose answer with citations; no product cards for pure troubleshoot.
+4. **Response** is returned as: **content** (markdown), **sources** (citations for “Sources” in UI), **product_cards** (for “Suggested parts” / part links). Frontend renders markdown, source links, and cards; PartSelect base URLs are resolved to model/part pages where possible.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Architecture overview
 
-## Learn More
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Web (Next.js)                                                           │
+│  Chat UI → /chat, /chat/stream → API                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+                                      │
+                                      ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  API (FastAPI)                                                           │
+│  Scope router → run_agent(message, scope_label, history)                 │
+│  Agent: build initial state → LangGraph.ainvoke → postprocess           │
+│  → content, sources, product_cards                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+         │                    │                      │
+         ▼                    ▼                      ▼
+   config/              app/agent_graph        app/tools
+   scope_contract.json   (LangGraph)            RAG, part_lookup,
+   source_policy.json   triage / llm_planner   search_parts, Serp
+   state_guide_links     → nodes → END          check_compatibility
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**Repository layout:**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+case-study/
+├── config/                 # Domain and routing config
+│   ├── scope_contract.json # Intents, entities, patterns, forbidden topics
+│   ├── source_policy.json  # State → symptom tags, appliance, adjacent states (RAG filter)
+│   └── state_guide_links.json
+├── apps/
+│   ├── api/                # FastAPI app
+│   │   ├── app/            # scope_router, agent, agent_graph, tools, evidence, retrieval, …
+│   │   ├── main.py         # /chat, /chat/stream
+│   │   ├── schema.sql      # Postgres + pgvector (parts, models, chunks, embeddings)
+│   │   └── requirements.txt
+│   └── web/                # Next.js (App Router)
+│       ├── app/            # page, layout
+│       ├── components/     # Chat, ProductCard, Header
+│       └── package.json
+└── scripts/
+    └── ingest/             # RAG: chunk, embed, load; optional model/parts fetch
+```
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Agent state & routing design
 
-### Analyzing the Bundle Size
+- **State** (`TroubleshootingState`): `message`, `scope_label`, `model_number`, `part_number`, `appliance_type`, `intent`, `current_state`, `evidence`, `answer`, `citations`, `product_cards`, `next_action`, and planner fields (`planner_next_action`, `action_args`, `info_type`, …). Nodes return partial updates merged into state.
+- **Routing** is a single switch on `next_action`:
+  - **ask_clarify** → node returns a clarify question; no citations/cards.
+  - **parts_list_answer** → model + “parts for” / specs / manual; Serp + optional DB; answer + product_cards.
+  - **part_lookup_answer** → part number (e.g. PS…); part_lookup or Serp summary; answer + optional one card.
+  - **compatibility_answer** → model + part; check_compatibility; yes/no answer + model link.
+  - **find_model_help** → short text + citations only (no product cards); links in Sources.
+  - **retrieve** → RAG path: get_troubleshooting → evidence → normalize_compose → citation_gate → answer + citations; product_cards = [].
+- **Triage vs LLM planner**: with `USE_LLM_ROUTER_PLANNER=1`, START goes to `llm_router` → `llm_planner`, which sets `next_action` (and optional slots). Otherwise, rule-based **triage** sets `next_action`; refrigerator flows can go through **cooling_split** (e.g. both warm vs freezer cold / fridge warm) before clarify or retrieve.
+- **Source policy** (`config/source_policy.json`): per diagnostic state, allowed/forbidden symptom tags and appliance type; used to filter suggested links and RAG so refrigerator queries don’t get dishwasher links and vice versa.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## Data & knowledge strategy
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Scope contract** (`config/scope_contract.json`): allowed intents, entities, brands, forbidden topics, patterns; used by the scope router and kept in sync with product scope.
+- **RAG**: Repair guides (HTML) are chunked, embedded (OpenAI), and stored in Postgres (pgvector). `get_troubleshooting` retrieves by embedding + optional state/symptom filter; evidence is passed to a compose step (claim-based or fallback) with citations from chunks. Suggested links for troubleshoot (no model) are capped and filtered by appliance type.
+- **Structured data**: `parts`, `models`, `part_fitment` (or compatibility), `model_sections`, `section_parts` for part lookup and compatibility. When DB has no hit, the agent can fall back to Serp + LLM summarization for model or part.
+- **Serp**: Used for model/part page discovery, symptom-specific part lists, and URL resolution when only a title is available. No Playwright in the main answer path; optional live fetch behind a feature flag.
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Example conversations
 
-### Deployment
+| User | System behavior |
+|------|------------------|
+| “Where can I find my model number?” | find_model_help: short guidance + Sources (Refrigerator / Dishwasher locator links). No product card. |
+| “Parts for WRF535SWHZ” | parts_list: answer + product_cards (model overview, symptom/part links as applicable). |
+| “Is PS11752778 compatible with WDT780SAEM1?” | compatibility_answer: Yes/No + model link. |
+| “My fridge is not making ice” | retrieve: RAG over repair guides → answer + citations (Suggested links). No suggested parts unless user later asks for parts for a model. |
+| “Install PS12345678” (no model/part in message) | ask_clarify: “Share model number or part number so I can help.” |
+| “Write me a poem” | Scope router: out-of-scope → redirect to appliance parts/support only. |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## Frontend & UX
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Stack**: Next.js (App Router), Tailwind, React Markdown. Chat calls `POST /chat` or SSE `GET /chat/stream` with history; response includes `content`, `sources`, `product_cards`.
+- **Rendering**: Markdown for the reply; **Sources** as a list of links below the answer; **product_cards** as compact cards (title, “View on PartSelect →”). PartSelect base URLs are rewritten client-side to model or part URLs when possible (using model from content or card name).
+- **Scoping**: No change to UI for in/out-of-scope; the user sees either the agent reply or the single redirect message.
+
+---
+
+## Extensibility & future work
+
+- **New appliances**: Extend `scope_contract` and `source_policy`, add appliance-specific states and routes, and extend RAG/ingest to new guide sets.
+- **New intents**: Add nodes and `next_action` values (e.g. order status, warranty); wire planner/triage to new actions and keep citations/cards semantics.
+- **Stronger RAG**: Finer-grained chunks, hybrid search, or re-ranking; keep citation-to-chunk contract so answers stay grounded.
+- **Eval**: Use `scripts/eval` (or add) for scope accuracy, routing correctness, and answer quality; guardrails for citations and product_cards.
+
+---
+
+## Quick start
+
+**API (FastAPI)**
+
+```bash
+cd apps/api && python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+**Web (Next.js)**
+
+From repo root:
+
+```bash
+npm run dev
+```
+
+Or from `apps/web`: `npm install && npm run dev`. Open http://localhost:3000. Set `NEXT_PUBLIC_API_URL=http://localhost:8000` if the API runs elsewhere.
+
+**Database (optional, for full RAG)**
+
+```bash
+createdb partselect
+psql partselect -f apps/api/schema.sql
+```
+
+**Environment**
+
+- `OPENAI_API_KEY`: used for scope (optional), LLM planner/slots (when `USE_LLM_ROUTER_PLANNER=1`), RAG compose, and Serp summarization.
+- `DATABASE_URL`: for RAG and part lookup (optional if using Serp/fallbacks only).
+- See `scripts/ingest/.env.example` for ingest-related variables.

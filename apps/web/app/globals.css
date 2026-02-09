@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PartSelect 官网 CSS 色值与基础样式（与 partselect.com 一致） */
+:root {
+  --ps-white: #fff;
+  --ps-off-white: #f2f2f2;
+  --ps-border: #ddd;
+  --ps-text: #121212;
+  --ps-text-muted: #444;
+  /* 主色：官网 teal #337778 */
+  --ps-teal: #337778;
+  --ps-teal-hover: #2c6666;
+  --ps-teal-light: #e6f5f5;
+  /* 官网黄色：Find Your Part / searchbox / btn--orange #f3c04c */
+  --ps-yellow: #f3c04c;
+  --ps-yellow-hover: rgba(243, 192, 76, 0.85);
+  /* 官网无圆角 */
+  --ps-radius: 0;
+  --ps-chat-user: #337778;
+  --ps-chat-bot: #f7f7f7;
+  --ps-shadow: 0 1px 4px 1px rgba(0, 0, 0, 0.2);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  line-height: 1.15;
+}
+
+body {
+  min-height: 100%;
+  background-color: var(--ps-white);
+  color: var(--ps-text);
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+a {
+  background-color: transparent;
+  color: var(--ps-teal);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  border-radius: 0;
+  -webkit-border-radius: 0;
+  background-color: var(--ps-white);
+  border: 1px solid var(--ps-teal);
+  color: var(--ps-text);
+  padding: 8px 7px 9px;
+}
+
+input::placeholder,
+select::placeholder,
+textarea::placeholder {
+  color: var(--ps-text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 0;
+  border-color: var(--ps-teal);
+}
+
+/* 官网 .btn--teal */
+.btn-teal {
+  align-items: center;
+  border: 0;
+  background: var(--ps-teal);
+  color: var(--ps-white);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 600;
+  justify-content: center;
+  padding: 0 10px;
+  height: 35px;
+  line-height: 35px;
+  text-align: center;
+  transition: filter ease-in 0.4s;
+}
+
+.btn-teal:hover {
+  filter: brightness(85%);
+  text-decoration: none;
+}
+
+/* 官网 .btn--orange */
+.btn-yellow {
+  background: var(--ps-yellow);
+  color: var(--ps-text);
+}
+
+.btn-yellow:hover {
+  filter: brightness(85%);
+  text-decoration: none;
+}
+
+/* 顶条：Order Status / Your Account / Cart 为黑色图标和文字（与官网一致） */
+.header-top-bar a {
+  color: #121212 !important;
+}
+.header-top-bar a:hover {
+  color: var(--ps-teal) !important;
+}
+.header-top-bar svg {
+  stroke: #121212;
+}
+.header-top-bar a:hover svg {
+  stroke: var(--ps-teal);
+}

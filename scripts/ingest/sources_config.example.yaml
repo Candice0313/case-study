@@ -1,0 +1,43 @@
+# 抓取与入库存档配置示例
+# 复制为 sources_config.yaml 后按需填写；运行 fetch.py 会按此配置拉取并写入 sources/
+
+# 官网 HTML 维修页（可直接抓取，与 scope 一致：冰箱 + 洗碗机）
+html_urls:
+  - url: "https://www.partselect.com/Repair/Refrigerator/"
+    name: "partselect-repair-refrigerator"
+  - url: "https://www.partselect.com/Repair/Dishwasher/"
+    name: "partselect-repair-dishwasher"
+  # 洗碗机型号列表（约 44640 条，每页 100；抓取后可用 fetch_partselect_models --from-html 解析出 CSV）
+  - url: "https://www.partselect.com/Dishwasher-Models.htm"
+    name: "partselect-dishwasher-models"
+  - url: "https://www.partselect.com/Repair/Refrigerator/Noisy/"
+    name: "partselect-refrigerator-noisy"
+  - url: "https://www.partselect.com/Repair/Refrigerator/Leaking/"
+    name: "partselect-refrigerator-leaking"
+  - url: "https://www.partselect.com/Repair/Refrigerator/Refrigerator-Too-Warm/"
+    name: "partselect-refrigerator-too-warm"
+  - url: "https://www.partselect.com/Repair/Refrigerator/Not-Making-Ice/"
+    name: "partselect-refrigerator-not-making-ice"
+  - url: "https://www.partselect.com/Repair/Dishwasher/Leaking/"
+    name: "partselect-dishwasher-leaking"
+  - url: "https://www.partselect.com/Repair/Dishwasher/Not-Draining/"
+    name: "partselect-dishwasher-not-draining"
+  - url: "https://www.partselect.com/Repair/Dishwasher/Will-Not-Fill-Water/"
+    name: "partselect-dishwasher-will-not-fill"
+
+# 官网 PDF（部分 CDN 可能 403，可先跑 html_urls 再试）
+pdf_urls: []
+  # - url: "https://www.partselect.com/.../manual.pdf"
+  #   name: "partselect-manual"
+  # 制造商手册（带 Troubleshooting 段落）
+  # - url: "https://www.whirlpool.com/.../owner-manual.pdf"
+  #   name: "whirlpool-fridge-manual"
+
+# 可选：简单爬取规则（只抓指定前缀的链接，不抓全站）
+# crawl:
+#   base_url: "https://www.partselect.com/Repair/"
+#   allow_path_prefixes: ["/Repair/Refrigerator", "/Repair/Dishwasher"]
+#   max_pages: 50
+
+# 请求间隔（秒），避免对目标站压力过大
+fetch_delay_seconds: 1.0

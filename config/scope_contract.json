@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "domain": "partselect",
+  "allowed_appliance_types": ["refrigerator", "dishwasher"],
+  "allowed_intents": [
+    "part_lookup",
+    "model_lookup",
+    "compatibility_check",
+    "installation_guidance",
+    "troubleshooting",
+    "order_support",
+    "warranty_inquiry",
+    "shipping_tracking",
+    "return_exchange",
+    "model_number_help",
+    "diagram_manual"
+  ],
+  "allowed_entities": {
+    "appliance_type": ["refrigerator", "dishwasher", "fridge", "ice maker"],
+    "identifiers": ["part_number", "model_number", "brand", "symptom", "serial_number"]
+  },
+  "allowed_brands": [
+    "whirlpool", "ge", "general electric", "samsung", "lg", "maytag",
+    "kitchenaid", "bosch", "frigidaire", "kenmore", "electrolux", "hotpoint"
+  ],
+  "forbidden_topics": [
+    "coding", "programming", "schoolwork", "homework", "medical", "health",
+    "legal", "law", "finance", "investment", "politics", "religion",
+    "other_appliances", "washer", "dryer", "oven", "stove", "microwave",
+    "lawn", "garden", "power tool", "off_topic", "joke", "weather"
+  ],
+  "out_of_scope_phrases": [
+    "write code", "help me with homework", "legal advice", "medical advice",
+    "invest money", "vote for", "washing machine", "dryer", "oven", "stove"
+  ],
+  "part_number_pattern": "^[A-Z0-9\\-]{4,20}$",
+  "model_number_pattern": "^[A-Z0-9\\-]{4,25}$",
+  "in_scope_keywords": [
+    "part", "parts", "model", "models", "compatible", "compatibility", "fit", "fits",
+    "install", "installation", "replace", "replacement", "repair", "fix", "broken",
+    "refrigerator", "fridge", "freezer", "dishwasher", "symptom", "problem", "issue",
+    "order", "track", "shipping", "delivery", "warranty", "return", "exchange",
+    "manual", "diagram", "guide", "video", "instruction", "how to",
+    "water", "ice", "filter", "leak", "leaking", "noise", "loud", "not cooling",
+    "cold", "warm", "cooling", "door", "seal", "gasket", "motor", "compressor", "thermostat", "valve"
+  ],
+  "symptom_keywords": [
+    "not cooling", "not filling", "leaking", "leak", "noise", "loud", "ice", "water",
+    "door", "seal", "light", "running", "cycling", "freezing", "frost", "drain",
+    "not working", "isn't working", "broken", "problem", "issue"
+  ],
+  "clarification_triggers": {
+    "min_words": 2,
+    "requires_model_for_compatibility": true
+  }
+}

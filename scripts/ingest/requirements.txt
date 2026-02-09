@@ -1,0 +1,12 @@
+# RAG ingestion pipeline (run from scripts/ingest with venv)
+python-dotenv>=1.0.0
+beautifulsoup4>=4.12.0
+openai>=1.12.0
+psycopg[binary]>=3.1.0
+pgvector>=0.2.0
+# Fetch: scrape HTML + download PDF and extract text
+httpx>=0.25.0
+pyyaml>=6.0
+pdfplumber>=0.10.0
+# 无头浏览器（遇 403 时自动用浏览器拉取，实现进 sources 全自动）
+playwright>=1.40.0

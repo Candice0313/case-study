@@ -1,0 +1,86 @@
+{
+  "REF_S6_BOTH_WARM": {
+    "appliance": "refrigerator",
+    "allowed_symptom_tags": ["too_warm", "not_cooling"],
+    "forbidden_symptom_tags": ["too_cold"],
+    "adjacent_states": ["REF_S7_FREEZER_COLD_FRIDGE_WARM", "REF_S9_FALLBACK"]
+  },
+  "REF_S7_FREEZER_COLD_FRIDGE_WARM": {
+    "appliance": "refrigerator",
+    "allowed_symptom_tags": ["too_warm"],
+    "forbidden_symptom_tags": ["too_cold"],
+    "adjacent_states": ["REF_S6_BOTH_WARM", "REF_S9_FALLBACK"]
+  },
+  "REF_S8_TOO_COLD": {
+    "appliance": "refrigerator",
+    "allowed_symptom_tags": ["too_cold"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["REF_S9_FALLBACK"]
+  },
+  "REF_ICE_MAKER": {
+    "appliance": "refrigerator",
+    "allowed_symptom_tags": ["ice_maker_issue"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["REF_S9_FALLBACK"]
+  },
+  "REF_S9_FALLBACK": {
+    "appliance": "refrigerator",
+    "allowed_symptom_tags": [],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["REF_S6_BOTH_WARM", "REF_S7_FREEZER_COLD_FRIDGE_WARM", "REF_ICE_MAKER"]
+  },
+  "DW_NOT_DRAINING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["not_draining", "drain"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_CLEANING", "DW_WILL_NOT_START", "DW_LEAKING"]
+  },
+  "DW_LEAKING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["leaking", "leak"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRAINING", "DW_NOT_FILLING"]
+  },
+  "DW_WILL_NOT_START": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["will_not_start", "not_starting"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRAINING", "DW_NOT_CLEANING"]
+  },
+  "DW_NOT_CLEANING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["not_cleaning", "cleaning"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRAINING", "DW_WILL_NOT_START", "DW_NOT_FILLING"]
+  },
+  "DW_NOT_FILLING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["not_filling", "fill", "water"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRAINING", "DW_LEAKING", "DW_NOT_CLEANING"]
+  },
+  "DW_NOT_DISPENSING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["not_dispensing", "detergent", "dispenser"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_CLEANING"]
+  },
+  "DW_NOT_DRYING": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["not_drying", "drying"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_CLEANING", "DW_NOISY"]
+  },
+  "DW_NOISY": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": ["noise", "noisy"],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRYING", "DW_NOT_DRAINING"]
+  },
+  "DW_FALLBACK": {
+    "appliance": "dishwasher",
+    "allowed_symptom_tags": [],
+    "forbidden_symptom_tags": [],
+    "adjacent_states": ["DW_NOT_DRAINING", "DW_NOT_CLEANING", "DW_WILL_NOT_START"]
+  }
+}
