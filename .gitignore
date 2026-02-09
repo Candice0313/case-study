@@ -22,3 +22,7 @@ venv
 # Config: generated/large model lists
 config/partselect_dishwasher_models_full.csv
 config/partselect_dishwasher_models.csv
+
+# Ingest: scraped/generated source HTML and text (recreate with fetch.py or add manually)
+scripts/ingest/sources/*
+!scripts/ingest/sources/.gitkeep
