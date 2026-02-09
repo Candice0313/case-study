@@ -101,16 +101,28 @@ case-study/
 
 ## Agent state & routing design
 
-- **State** (`TroubleshootingState`): `message`, `scope_label`, `model_number`, `part_number`, `appliance_type`, `intent`, `current_state`, `evidence`, `answer`, `citations`, `product_cards`, `next_action`, and planner fields (`planner_next_action`, `action_args`, `info_type`, …). Nodes return partial updates merged into state.
-- **Routing** is a single switch on `next_action`:
-  - **ask_clarify** → node returns a clarify question; no citations/cards.
-  - **parts_list_answer** → model + “parts for” / specs / manual; Serp + optional DB; answer + product_cards.
-  - **part_lookup_answer** → part number (e.g. PS…); part_lookup or Serp summary; answer + optional one card.
-  - **compatibility_answer** → model + part; check_compatibility; yes/no answer + model link.
-  - **find_model_help** → short text + citations only (no product cards); links in Sources.
-  - **retrieve** → RAG path: get_troubleshooting → evidence → normalize_compose → citation_gate → answer + citations; product_cards = [].
-- **Triage vs LLM planner**: with `USE_LLM_ROUTER_PLANNER=1`, START goes to `llm_router` → `llm_planner`, which sets `next_action` (and optional slots). Otherwise, rule-based **triage** sets `next_action`; refrigerator flows can go through **cooling_split** (e.g. both warm vs freezer cold / fridge warm) before clarify or retrieve.
-- **Source policy** (`config/source_policy.json`): per diagnostic state, allowed/forbidden symptom tags and appliance type; used to filter suggested links and RAG so refrigerator queries don’t get dishwasher links and vice versa.
+The agent is a state machine: each turn it carries forward context (user message, extracted model/part, appliance type, etc.), chooses one **next action**, runs the matching node, then merges the result back into state. The graph runs until it reaches an answer.
+
+**What the agent tracks (state)**  
+`TroubleshootingState` holds inputs (e.g. `message`, `scope_label`, `model_number`, `part_number`, `appliance_type`, `intent`, `current_state`), planner outputs (`next_action`, `planner_next_action`, `action_args`, `info_type`), and outputs (e.g. `evidence`, `answer`, `citations`, `product_cards`). Each node returns a partial update that gets merged into this state.
+
+**How the next action is chosen**  
+- **LLM planner** (default when `USE_LLM_ROUTER_PLANNER=1`): the graph sends the message to `llm_router` → `llm_planner`, which sets `next_action` (and optional slots like model/part).  
+- **Rule-based triage**: otherwise, deterministic rules set `next_action`. For refrigerators, a **cooling_split** step can refine the path (e.g. “fridge and freezer both warm” vs “freezer cold, fridge warm”) before clarify or RAG.
+
+**What each action does (routing)**  
+
+| `next_action` | What happens | Output |
+|---------------|--------------|--------|
+| **ask_clarify** | Ask the user for missing info (e.g. model or part number). | Short question; no citations or product cards. |
+| **parts_list_answer** | Answer “parts for model X” using Serp and optional DB. | Answer + product cards (model/symptom/part links). |
+| **part_lookup_answer** | Look up a part number (e.g. PS…) via part_lookup or Serp. | Answer + optional single product card. |
+| **compatibility_answer** | Check whether a part fits a model. | Yes/no + model link. |
+| **find_model_help** | Explain where to find the model number. | Short text + Sources (refrigerator/dishwasher locator links); no product cards. |
+| **retrieve** | Run RAG over repair guides: get_troubleshooting → evidence → compose answer with citations. | Answer + citations; no product cards for pure troubleshooting. |
+
+**Source policy**  
+`config/source_policy.json` defines, per diagnostic state, which symptom tags and appliance types are allowed or forbidden. That filters RAG and suggested links so refrigerator questions don’t get dishwasher links and vice versa.
 
 ---
 

@@ -84,7 +84,7 @@ Place `.html` or `.txt` files in `sources/` (or `SOURCES_DIR`):
 - PartSelect repair/product pages, brand troubleshooting guides.
 - For PDF manuals: extract text to `.txt`, or use `fetch.py` with `pdf_urls` in the config.
 
-Sample files in `sources/` are included so you can run the pipeline once without adding your own pages.
+The `sources/` directory is kept in the repo but its contents (`.html`/`.txt`) are **not** committed — add them via `fetch.py` or by dropping files in manually. This keeps the repo small and avoids committing scraped content.
 
 ---
 
