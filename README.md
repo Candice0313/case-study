@@ -56,16 +56,16 @@ The repo implements a **single-domain chat assistant** aligned to a PartSelect-s
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  Web (Next.js)                                                           │
-│  Chat UI → /chat, /chat/stream → API                                     │
+│  Web (Next.js)                                                          │
+│  Chat UI → /chat, /chat/stream → API                                    │
 └─────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  API (FastAPI)                                                           │
-│  Scope router → run_agent(message, scope_label, history)                 │
+│  API (FastAPI)                                                          │
+│  Scope router → run_agent(message, scope_label, history)                │
 │  Agent: build initial state → LangGraph.ainvoke → postprocess           │
-│  → content, sources, product_cards                                       │
+│  → content, sources, product_cards                                      │
 └─────────────────────────────────────────────────────────────────────────┘
          │                    │                      │
          ▼                    ▼                      ▼
