@@ -149,7 +149,6 @@ case-study/
 - **New appliances**: Extend `scope_contract` and `source_policy`, add appliance-specific states and routes, and extend RAG/ingest to new guide sets.
 - **New intents**: Add nodes and `next_action` values (e.g. order status, warranty); wire planner/triage to new actions and keep citations/cards semantics.
 - **Stronger RAG**: Finer-grained chunks, hybrid search, or re-ranking; keep citation-to-chunk contract so answers stay grounded.
-- **Eval**: Use `scripts/eval` (or add) for scope accuracy, routing correctness, and answer quality; guardrails for citations and product_cards.
 
 ---
 
@@ -183,5 +182,6 @@ psql partselect -f apps/api/schema.sql
 **Environment**
 
 - `OPENAI_API_KEY`: used for scope (optional), LLM planner/slots (when `USE_LLM_ROUTER_PLANNER=1`), RAG compose, and Serp summarization.
+- `SERPAPI_API_KEY`: **recommended** for full agent behavior. Used for PartSelect model/part page discovery, “find model number” links, parts list and part lookup fallbacks, and compatibility link resolution. Without it, those flows return empty or skip Serp; get a key at [serpapi.com](https://serpapi.com/search-api).
 - `DATABASE_URL`: for RAG and part lookup (optional if using Serp/fallbacks only).
-- See `scripts/ingest/.env.example` for ingest-related variables.
+- See **`apps/api/.env.example`** for API env vars (copy to `apps/api/.env`); see `scripts/ingest/.env.example` for ingest-related variables.
